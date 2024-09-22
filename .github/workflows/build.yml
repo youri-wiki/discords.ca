@@ -20,6 +20,11 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -t ecdsa github.com >> ~/.ssh/known_hosts
 
+    - name: Config git
+      run: |
+        git config --global user.name "masterdpro"
+        git config --global user.email "master@discords.ca"    
+
     - name: SSH into the pi and deploy
       uses: appleboy/ssh-action@master
       with:
