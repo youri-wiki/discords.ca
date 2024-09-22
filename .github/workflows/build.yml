@@ -28,6 +28,7 @@ jobs:
         password: 1234
         port: 22
         script: |
+        
           cd "/home/youri/dsc.ca/"
           git pull origin master
         
