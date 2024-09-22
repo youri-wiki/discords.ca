@@ -10,7 +10,7 @@
 
   <div class="Top">
     <h1>{{ pName }}</h1>
-    <p><i>Youri's messing up space</i></p>
+    <p><i>youri's messing up space</i></p>
   </div>
   <div v-if="module == 'home'">
     <div class="center">
