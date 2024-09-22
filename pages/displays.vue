@@ -3,7 +3,7 @@
   <body>
     <div v-if="!loggedIn">
       <div>
-        login
+        log-in
         <login />
       </div>
       <div>

@@ -9,9 +9,10 @@
   
     <body>
       <div class="top-content">
-        <img src="../../assets/img/youyoulepan.svg" alt="youyoulepan" class="youyoulepan" />
         <div class="names">
-          <h1 class="Masterdpro">masterdpro</h1>
+        <img src="../../assets/img/youyoulepan.svg" alt="youyoulepan" class="youyoulepan" />
+        <div class="row">
+        <h1 class="Masterdpro">masterdpro</h1>
           <div class="badges">
             <img src="../../assets/img/vue.png" />
             <img src="../../assets//img/js.png" />
@@ -20,6 +21,8 @@
             <img src="../../assets//img/ts.png" />
             <img src="../../assets//img/react.png" />
           </div>
+          </div>
+        </div>
           <div class="bio">
             <p>
               Hi ! I'm Youri, a young canadian fullstack developper (No, I can't hack anyone. I don't
@@ -28,10 +31,7 @@
               ko-fi page &lt;3.
             </p>
           </div>
-        </div>
-      </div>
-  
-      <div class="terminal">
+        <div class="terminal">
         <h1>C:\user\youri\workspace: <span class="flash">_</span></h1>
         <h1>
           C:\user\youri\workspace\discord:
@@ -48,15 +48,11 @@
           </span>
         </h1>
       </div>
+      </div>
+  
+    
     </body>
-    <div class="wtf">
-      <h1 class="wtf">
-        Do you find yourself funny or ? no I won't make my website fit in {{ width }}px..
-      </h1>
-      <img src="../assets/img/troll_1f9cc.png" />
-      <h1 class="wtf"><strong>BUT</strong>I could fit a toilet paper roll</h1>
-      <img src="../../assets/img/pq.png" :style="{ width: width + 'px' }" />
-    </div>
+   
   </template>
   
   <script>
@@ -89,22 +85,19 @@
   <style scoped lang="css">
   body {
     font-family: sans-serif;
-    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
   }
   
-  .wtf {
-    display: none;
-  }
+ 
   
   .top-content {
     display: flex;
     justify-content: center;
     align-items: start;
-    max-height: 15rem;
+    flex-direction: column;
     position: relative;
     bottom: 7rem;
     padding: 10px;
@@ -113,24 +106,33 @@
   .names {
     display: flex;
     justify-content: center;
-    align-items: start;
+    align-items: center;
     position: relative;
-    margin-bottom: 10%;
+    flex-direction: row;
+  }
+
+  .row {
+    display: flex;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
   }
   
   .bio {
+    display: flex;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2rem;
+    width: 100%;
     max-width: 800px;
-    min-width: 200px;
   }
   
   .badges {
     position: relative;
-    bottom: 50px;
-    left: 20px;
     display: flex;
     align-items: center;
-    justify-content: center;
     height: 80px;
     width: auto;
   }
@@ -138,12 +140,11 @@
   .badges img {
     width: 30px;
     height: auto;
+    align-self: flex-start;
+    justify-self: start;
     margin-right: 10px;
   }
-  
-  .names p {
-    color: black;
-  }
+
   
   .youyoulepan {
     width: 200px;
@@ -156,35 +157,23 @@
     color: #ffffff;
   }
   
-  .Youri {
-    font-size: 3rem;
-    margin-left: 10px;
-    color: #ff6eff;
-    text-shadow:
-      1px 1px 0 #ff00ff,
-      /* Pink shadow */ 2px 2px 0 #cc00ff,
-      /* Purple shadow */ 3px 3px 0 #9900ff,
-      /* Deeper purple shadow */ 4px 4px 0 #6600ff,
-      /* Even deeper purple shadow */ 5px 5px 0 #3300ff;
-    /* Deepest purple shadow */
-  }
-  
   .Masterdpro {
     background: linear-gradient(45deg, #ff00ff, #cc00ff, #9900ff, #6600ff, #3300ff);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     font-size: 3rem;
-    margin-left: 10px;
+    margin-bottom: 0;
   }
   
   p {
     font-size: 1.5rem;
     margin-left: 10px;
-    color: #ff6eff;
+    color: #000000;
   }
   
   .terminal {
     background-color: black;
+    display: flex;
     position: relative;
     margin-top: 10rem;
     min-width: 40rem;
@@ -193,7 +182,6 @@
     flex-direction: column;
     justify-content: center;
     align-items: start;
-    display: flex;
     padding: 10px;
     border: 2px solid #616161;
     border-radius: 10px;
@@ -291,7 +279,7 @@
     text-decoration: underline;
   }
   
-  @media screen and (min-width: 982px) {
+  @media screen and (max-width: 982px) {
     body {
       font-family: sans-serif;
       display: flex;
@@ -304,15 +292,14 @@
       justify-content: center;
       align-items: center;
       position: relative;
-      top: 15rem;
-      margin-bottom: 10rem;
+      max-height: none;
       flex-direction: column;
     }
   
     .names {
       display: flex;
       justify-content: center;
-      align-items: start;
+      align-items: center;
       position: relative;
       margin-bottom: 0rem;
       flex-direction: column;
@@ -322,11 +309,20 @@
       position: relative;
       left: 50%;
       top: 15%;
+      margin-bottom: 0%;
       transform: translate(-50%, -50%);
     }
     .bio {
+      display: flex;
       position: relative;
-      bottom: 10%;
+      font-size: 200px;
+      width: 80%;
+      justify-self: center;
+      align-self: center;
+    }
+    
+    .bio p {
+      font-size: 20px;
     }
   
     .badges {
@@ -343,6 +339,8 @@
     .badges img {
       width: 30px;
       height: auto;
+      align-self: start;
+      justify-self: center;
     }
   
     .youyoulepan {
@@ -351,49 +349,29 @@
     }
   
     .terminal {
-      background-color: black;
+      background-color: rgb(0, 0, 0);
       position: relative;
-      margin-top: 20rem;
-      width: 80%;
-      height: 30rem;
-      display: flex;
+      margin-top: 5rem;
+      width: 90%;
+      min-width: auto;
+      max-width: 80rem;
+      height: auto;
+      max-height: auto;
       flex-direction: column;
       justify-content: center;
       align-items: start;
-      padding: 10px;
+      display: flex;
+      padding: unset;
       border: 2px solid #616161;
       border-radius: 10px;
+      overflow: scroll;
     }
   
     h1 {
+      margin-left: 20px;
       font-size: 2rem;
     }
   }
   
-  @media screen and (max-width: 657px) {
-    body {
-      display: none;
-    }
-  
-    .wtf {
-      display: flex;
-      font-size: 2rem;
-      color: rgb(0, 0, 0);
-      position: relative;
-      max-width: 90%;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-      text-align: center;
-      justify-content: center;
-      flex-direction: column;
-    }
-  
-    .wtf img {
-      width: 100px;
-      height: auto;
-      display: block;
-      margin: auto;
-    }
-  }
   </style>
   

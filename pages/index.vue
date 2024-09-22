@@ -3,14 +3,14 @@
     name="viewport"
     content="width=device-width, initial-scale=1, maximum-scale=1"
   />
-  <p @click="toggleMenu">
+  <p @click="toggleMenu" class="sidebar">
     <i class="fas fa-bars"></i>
   </p>
   <sidebar ref="sideMenu" />
 
   <div class="Top">
     <h1>{{ pName }}</h1>
-    <p><i>Youri's messing up space</i></p>
+    <p><i>youri's messing up space</i></p>
   </div>
   <div v-if="module == 'home'">
     <div class="center">
@@ -201,7 +201,7 @@ template {
   padding: 10px;
   border-radius: 10px;
   margin: 10px;
-  margin-bottom: 10rem;
+  margin-bottom: 5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -352,6 +352,13 @@ template {
   bottom: 5px;
   color: rgb(8, 97, 119);
   transition: all 0.3s ease-in-out;
+}
+
+.sidebar{
+  display: flex;
+  position: relative;
+  margin-left: 30px;
+  font-size: 30px;
 }
 
 @media (max-width: 768px) {
