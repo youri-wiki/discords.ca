@@ -1,6 +1,6 @@
 <template>
   <div class="wtf-container">
-    <h1>WTF!</h1>
+    <h1>WTF!!</h1>
     <form @submit.prevent="sendNote(username, content)">
       <input type="text" v-model="username" placeholder="Username" />
       <input type="text" v-model="content" placeholder="Content" />
