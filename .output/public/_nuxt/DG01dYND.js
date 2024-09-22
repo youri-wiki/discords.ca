@@ -1,0 +1,1 @@
+import{_ as n,t as r,v as t,y as s}from"./DJDOrxpi.js";const o={data(){return{username:"John Doe"}}};function a(c,p,_,l,e,m){return r(),t("h1",null," Username: "+s(e.username),1)}const f=n(o,[["render",a]]);export{f as default};

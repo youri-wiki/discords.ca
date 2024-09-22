@@ -18,9 +18,6 @@ export default defineNuxtConfig({
       API_BASE_URL: process.env.API_BASE_URL
     },
 
-    modules:[
-      '@vesp/nuxt-fontawesome',
-    ],
   
     fontawesome: {
       icons: {
@@ -29,28 +26,7 @@ export default defineNuxtConfig({
       }
     },
   },
-  
-
-  components: [{
-        path:'~/components',
-        pathPrefix:false,    
-      
-      },],
-  modules:[
-    '@vesp/nuxt-fontawesome',
-  ],
-
-  fontawesome: {
-    icons: {
-      solid: ['faHome', 'faUser', 'faCog'],
-    }
-  },
-
-
-
-     
-
-
+ 
   
   css: [
     "@fortawesome/fontawesome-svg-core/styles.css",
