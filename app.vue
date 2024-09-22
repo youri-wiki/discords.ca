@@ -6,6 +6,6 @@
 <style lang="css">
 body {
   font-family: "Nunito sans", sans-serif;
-  margin: 0 ;
+  margin: 0;
 }
 </style>
