@@ -1,6 +1,0 @@
-const displayImg_vue_vue_type_style_index_0_scoped_fd9c9fcc_lang = "h1[data-v-fd9c9fcc],p[data-v-fd9c9fcc]{font-family:Quicksand,sans-serif}.image-container[data-v-fd9c9fcc]{align-items:center;display:flex;flex-wrap:wrap;gap:15px;margin-top:20px}.image-placeholder[data-v-fd9c9fcc]{background-color:grey;height:200px;width:200px}.image-wrapper[data-v-fd9c9fcc]{align-items:center;background-color:#4e4e4e;display:flex;flex-direction:column;height:250px;justify-content:center;margin-bottom:10px;position:relative;width:300px}.image[data-v-fd9c9fcc]{height:150px;margin-bottom:10px;-o-object-fit:contain;object-fit:contain;width:150px}.filename[data-v-fd9c9fcc]{color:#fff;margin:0;overflow:hidden;padding:5px;text-align:center;text-overflow:ellipsis;white-space:nowrap}.filename[data-v-fd9c9fcc],.info[data-v-fd9c9fcc]{position:relative}.info[data-v-fd9c9fcc]{align-items:center;background-color:rgba(87,116,116,.651);border-top-left-radius:10px;border-top-right-radius:10px;display:flex;flex-direction:row;height:60px;justify-content:center;top:15px;width:100%}";
-
-const displayImgStyles_D_bfid33 = [displayImg_vue_vue_type_style_index_0_scoped_fd9c9fcc_lang];
-
-export { displayImgStyles_D_bfid33 as default };
-//# sourceMappingURL=displayImg-styles.D_bfid33.mjs.map

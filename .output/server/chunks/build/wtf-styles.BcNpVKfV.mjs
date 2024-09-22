@@ -1,6 +1,0 @@
-const wtf_vue_vue_type_style_index_0_scoped_ebfe7e4b_lang = ".wtf-container[data-v-ebfe7e4b]{align-items:center;display:flex;flex-direction:column;justify-content:center;margin:0 auto;width:100%}.wtf-container[data-v-ebfe7e4b],input[data-v-ebfe7e4b]{transition:all .5s ease}input[data-v-ebfe7e4b]{background-color:#000;border:1px solid #000;border-radius:10px;color:#fff;font-size:16px;margin:10px;padding:10px}input[data-v-ebfe7e4b]:focus{background-color:#fff;border-radius:0;color:#000;outline:none}button[data-v-ebfe7e4b],input[data-v-ebfe7e4b]:focus{box-shadow:0 5px 10px rgba(0,0,0,.5)}button[data-v-ebfe7e4b]{background-color:#000;border:1px solid #000;border-radius:10px;color:#fff;margin:10px;padding:10px;transition:all .5s ease}button[data-v-ebfe7e4b]:hover{background-color:#fff;box-shadow:0 5px 10px rgba(0,0,0,.5);color:#000;cursor:pointer}button[data-v-ebfe7e4b]:active{box-shadow:0 0 10px rgba(0,0,0,.5);transform:translateY(5px)}.note-container[data-v-ebfe7e4b]{align-items:center;display:flex;flex-direction:column;justify-content:center;transition:all .5s ease;width:100%}.note[data-v-ebfe7e4b]{border:1px solid #000;border-radius:10px;margin:10px;padding:10px;width:50%}";
-
-const wtfStyles_BcNpVKfV = [wtf_vue_vue_type_style_index_0_scoped_ebfe7e4b_lang];
-
-export { wtfStyles_BcNpVKfV as default };
-//# sourceMappingURL=wtf-styles.BcNpVKfV.mjs.map
