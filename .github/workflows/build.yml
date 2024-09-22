@@ -35,4 +35,6 @@ jobs:
         script: |
           cd "/home/youri/dsc.ca/"
           git pull origin master
+          npm i
+          npm run build
         
