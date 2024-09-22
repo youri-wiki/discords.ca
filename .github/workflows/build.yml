@@ -1,0 +1,38 @@
+name: Build Nuxt Project
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -t ecdsa github.com >> ~/.ssh/known_hosts
+
+    - name: Config git
+      run: |
+        git config --global user.name "masterdpro"
+        git config --global user.email "master@discords.ca"    
+
+    - name: SSH into the pi and deploy
+      uses: appleboy/ssh-action@master
+      with:
+        host: 10.0.0.163
+        username: youri
+        password: 1234
+        port: 22
+        script: |
+          cd "/home/youri/dsc.ca/"
+          git pull origin master
+        
