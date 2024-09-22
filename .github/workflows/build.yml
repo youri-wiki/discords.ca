@@ -13,6 +13,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
+    - name: Set up SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -t ecdsa github.com >> ~/.ssh/known_hosts
+
     - name: SSH into the pi and deploy
       uses: appleboy/ssh-action@master
       with:
@@ -22,5 +29,5 @@ jobs:
         port: ${{ secrets.PORT }}
         script: |
           cd "/home/youri/dsc.ca/"
-          git pull origin main
+          git pull origin master
         
