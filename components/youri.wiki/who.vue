@@ -14,7 +14,7 @@
         <div class="row">
         <h1 class="Masterdpro">masterdpro</h1>
           <div class="badges">
-            <img src="../../assets/img/vue.png" />
+            <img src="..assets/img/Vue.png" />
             <img src="../../assets//img/js.png" />
             <img src="../../assets//img/py.png" />
             <img src="../../assets//img/cpp.png" />
