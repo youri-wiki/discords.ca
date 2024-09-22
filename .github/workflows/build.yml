@@ -36,5 +36,5 @@ jobs:
           cd "/home/youri/dsc.ca/"
           git pull origin master
           npm i
-          npm run build
+          npm run generate
         
