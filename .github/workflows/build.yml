@@ -23,10 +23,10 @@ jobs:
     - name: SSH into the pi and deploy
       uses: appleboy/ssh-action@master
       with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USR }}
-        password: ${{ secrets.PSW }}
-        port: ${{ secrets.PORT }}
+        host: youri@10.0.0.163
+        username: youri
+        password: 1234
+        port: 22
         script: |
           cd "/home/youri/dsc.ca/"
           git pull origin master
