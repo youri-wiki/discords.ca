@@ -22,5 +22,5 @@ jobs:
         port: ${{ secrets.PORT }}
         script: |
           cd "/home/youri/dsc.ca/"
-          git pull origin main
+          git pull origin master
         
