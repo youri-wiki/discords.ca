@@ -1,0 +1,26 @@
+name: Build Nuxt Project
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: SSH into the pi and deploy
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USR }}
+        password: ${{ secrets.PSW }}
+        port: ${{ secrets.PORT }}
+        script: |
+          cd "/home/youri/dsc.ca/"
+          git pull origin main
+        
