@@ -1,17 +1,20 @@
 <template>
   <header></header>
   <body>
+    <div class="container-loggin">
     <div v-if="!loggedIn">
       <div>
         log-in
         <login />
       </div>
       <div>
-        <div>sign-in</div>
-
-        <signin />
+        <div>
+          sign-in
+          <signin />
+        </div>
       </div>
     </div>
+  </div>
     <div v-if="loggedIn" class="logged">
       <sidebar @viewChanged="handleViewChange" style="position: fixed" />
 
@@ -41,6 +44,10 @@ useHead({
             type: "image/png",
             href: "https://discords.ca/api/image/displays",
             },
+            {
+            rel: "stylesheet",
+            href: "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css",
+           },
         ],
   meta: [
     {
