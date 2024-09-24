@@ -14,7 +14,7 @@
   </div>
   <div v-if="module == 'home'">
     <div class="center">
-      <h2>Social</h2>
+      <h2>Socials</h2>
       <div class="social-wrapper">
         <div class="social">
           <i class="fab fa-instagram"> </i>
