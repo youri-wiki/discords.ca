@@ -15,7 +15,7 @@ export default defineNuxtConfig({
     apiSecret:'123',
     // Keys within public are also exposed client-side
     public:{
-      API_BASE_URL: process.env.API_BASE_URL
+      API_BASE_URL: "https://discords.ca/api"
     },
 
   
