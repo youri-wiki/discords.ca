@@ -7,7 +7,7 @@
           <i class="fas fa-home"></i> Home
         </li>
         <li @click="changeView('data')" style="cursor: default">
-          <i class="fas fa-file-image"></i> data
+          <i class="fas fa-file-image"></i> Data
         </li>
         <li @click="changeView('api')" style="cursor: default">
           <i class="fas fa-server"></i> API
