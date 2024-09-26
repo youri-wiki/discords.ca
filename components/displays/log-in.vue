@@ -1,8 +1,8 @@
 <template>
   <div class="container">
     <div class="input-container">
-      <input type="text" v-model="username" placeholder="Username" class="text-input"/>
-      <input type="password" v-model="password" placeholder="Password" class="text-input"/>
+      <input type="text" v-model="username" placeholder="Username" class="text-input" />
+      <input type="password" v-model="password" placeholder="Password" class="text-input" />
     </div>
     <button @click="login" class="button"><i class="fas fa-sign-in-alt"></i></button>
   </div>
@@ -53,7 +53,7 @@ export default {
 </script>
 
 <style scoped>
-.container { 
+.container {
   background-color: rgb(205, 205, 205);
   display: flex;
   height: 100px;
@@ -70,16 +70,17 @@ export default {
   height: 100%;
   justify-content: center;
   align-items: center;
-  
+
 }
 
-.text-input { 
+.text-input {
+  font-size: 17px;
   width: 10rem;
   height: 50%;
   border-left: 5px solid rgb(0, 0, 0);
   border-right: 0px solid;
   border-top: 0px solid;
-  border-bottom: 1px solid rgb(0,0,0);
+  border-bottom: 1px solid rgb(0, 0, 0);
   background-color: transparent;
   margin-top: 10px;
   transition: all 0.3s ease-in-out;
@@ -101,7 +102,7 @@ export default {
   rotate: 180deg;
 }
 
-.text-input:focus{
+.text-input:focus {
   outline: none;
   border-top-left-radius: 5px;
   border-bottom-left-radius: 5px;

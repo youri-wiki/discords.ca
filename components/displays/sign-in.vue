@@ -90,6 +90,7 @@ export default {
 }
 
 .text-input {
+  font-size: 17px;
   width: 10rem;
   min-height: 35px;
   height: 100%;
