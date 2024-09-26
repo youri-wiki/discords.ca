@@ -2,11 +2,18 @@
   <div class="container">
     <div class="input-container">
       <input type="text" v-model="username" placeholder="Username" class="text-input" />
+      <p v-if="passwordMismatch" class="error-message">
+       <i>passwords doesn't match</i> 
+      </p>
       <input type="password" v-model="password" placeholder="Password" class="text-input" />
+      <input type="password" v-model="passwordConf" placeholder="Confirm password" class="text-input" />
     </div>
-    <button @click="signin" class="button"><i class="fas fa-sign-in-alt"></i></button>
+    <button @click="signin" class="button">
+      <i class="fas fa-sign-in-alt"></i>
+    </button>
   </div>
 </template>
+
 
 <script>
 export default {
@@ -14,13 +21,22 @@ export default {
     return {
       username: "",
       password: "",
+      passwordConf: "",
     };
+  },
+  computed: {
+    passwordMismatch() {
+      return this.password !== this.passwordConf && this.passwordConf.length > 0;
+    },
   },
   methods: {
     async signin() {
-      const runtimeConfig = useRuntimeConfig();
+      if (this.passwordMismatch) {
+        return; // Prevent signing in if passwords don't match
+      }
 
       try {
+        const runtimeConfig = useRuntimeConfig();
         const response = await fetch(
           `${runtimeConfig.public.API_BASE_URL}/db/create/${this.username}`,
           {
@@ -41,7 +57,6 @@ export default {
           sessionStorage.setItem("view", "home");
           location.reload();
         } else {
-          // Handle signin failure
           console.error("signin failed");
         }
       } catch (error) {
@@ -52,11 +67,12 @@ export default {
 };
 </script>
 
+
 <style scoped>
 .container {
   background-color: rgb(205, 205, 205);
   display: flex;
-  height: 100px;
+  height: auto;
   width: 15rem;
   justify-content: center;
   align-items: center;
@@ -75,7 +91,8 @@ export default {
 
 .text-input {
   width: 10rem;
-  height: 50%;
+  min-height: 35px;
+  height: 100%;
   border-left: 5px solid rgb(0, 0, 0);
   border-right: 0px solid;
   border-top: 0px solid;
@@ -83,6 +100,12 @@ export default {
   background-color: transparent;
   margin-top: 10px;
   transition: all 0.3s ease-in-out;
+}
+
+.error-message {
+  color: red;
+  font-size: 0.8rem;
+  margin-bottom: 10px;
 }
 
 .button {
