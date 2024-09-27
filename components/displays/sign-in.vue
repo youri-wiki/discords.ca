@@ -3,7 +3,7 @@
     <div class="input-container">
       <input type="text" v-model="username" placeholder="Username" class="text-input" />
       <p v-if="passwordMismatch" class="error-message">
-       <i>passwords doesn't match</i> 
+        <i>passwords doesn't match</i>
       </p>
       <input type="password" v-model="password" placeholder="Password" class="text-input" />
       <input type="password" v-model="passwordConf" placeholder="Confirm password" class="text-input" />
@@ -69,6 +69,14 @@ export default {
 
 
 <style scoped>
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px rgb(205, 205, 205) inset !important;
+}
+
+
 .container {
   background-color: rgb(205, 205, 205);
   display: flex;
@@ -77,7 +85,7 @@ export default {
   justify-content: center;
   align-items: center;
   padding: 10px;
-  border-radius: 20px;
+  border-radius: 7px;
 }
 
 .input-container {

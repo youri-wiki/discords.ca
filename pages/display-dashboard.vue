@@ -4,6 +4,7 @@
     <div v-if="!loggedIn">
       <div class="page-container">
         <div class="info-container">
+          <p class="back" @click="backToHome"><i class="fas fa-arrow-left"></i></p>
           <div v-if="displayLogin" class="register">
             <h2>Log-in</h2>
             <login />
@@ -146,6 +147,10 @@ export default {
         this.displayLogin = true;
         this.displaySignin = false;
       }
+    },
+    backToHome() {
+      this.$router.push({ path: '/displays' }); // Replace '/sign-in' with your actual sign-in route
+
     }
   },
   mounted() {
@@ -176,7 +181,7 @@ export default {
   justify-self: center;
   align-self: center;
   background-color: rgba(228, 228, 228, 0.673);
-  border-radius: 20px;
+  border-radius: 5px;
 }
 
 .register {
@@ -213,6 +218,20 @@ p {
 .info {
   margin: 20px;
   width: 100%;
+}
+
+.back {
+  position: absolute;
+  top: 10px;
+  left: 20px;
+  cursor: pointer;
+  font-size: 1.5rem;
+  transition: all 0.2s ease-in-out;
+  color: #000000;
+}
+
+.back:hover {
+  color: red;
 }
 
 .page {
