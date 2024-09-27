@@ -53,6 +53,14 @@ export default {
 </script>
 
 <style scoped>
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px rgb(205, 205, 205) inset !important;
+}
+
+
 .container {
   background-color: rgb(205, 205, 205);
   display: flex;
@@ -84,6 +92,7 @@ export default {
   background-color: transparent;
   margin-top: 10px;
   transition: all 0.3s ease-in-out;
+
 }
 
 .button {
