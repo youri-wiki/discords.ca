@@ -8,10 +8,21 @@
         </div>
         <!-- New element on the right side -->
         <div class="right-element">
-            <p class="element-p"><i class="fas fa-sign-in-alt"></i></p>
+            <p class="element-p" @click="redirectToSignIn"><i class="fas fa-sign-in-alt"></i></p>
         </div>
     </div>
 </template>
+
+<script>
+export default {
+    methods: {
+        redirectToSignIn() {
+            this.$router.push({ path: '/display-dashboard' }); // Replace '/sign-in' with your actual sign-in route
+        }
+    }
+}
+</script>
+
 
 <style scoped>
 .container {
