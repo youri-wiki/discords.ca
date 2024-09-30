@@ -1,6 +1,12 @@
 <template>
   <div class="container">
     <div class="input-container">
+      <p v-if="error" class="error-message">
+        <i>An error occured</i>
+      </p>
+      <p v-if="!usernameOk" class="error-message">
+        <i>Username already used</i>
+      </p>
       <input type="text" v-model="username" placeholder="Username" class="text-input" />
       <p v-if="passwordMismatch" class="error-message">
         <i>passwords doesn't match</i>
@@ -22,6 +28,8 @@ export default {
       username: "",
       password: "",
       passwordConf: "",
+      usernameOk: true,
+      error: false,
     };
   },
   computed: {
@@ -57,9 +65,13 @@ export default {
           sessionStorage.setItem("view", "home");
           location.reload();
         } else {
-          console.error("signin failed");
+          if (response.status === 409) {
+            this.usernameOk = false;
+            console.log("Username already used")
+          }
         }
       } catch (error) {
+        this.error = true;
         console.error("Error during signin:", error);
       }
     },

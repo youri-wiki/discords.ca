@@ -1,6 +1,9 @@
 <template>
   <div class="container">
     <div class="input-container">
+      <p v-if="!IDok" class="error-message">
+        <i>Wrong password or username</i>
+      </p>
       <input type="text" v-model="username" placeholder="Username" class="text-input" />
       <input type="password" v-model="password" placeholder="Password" class="text-input" />
     </div>
@@ -14,6 +17,7 @@ export default {
     return {
       username: "",
       password: "",
+      IDok: true,
     };
   },
   methods: {
@@ -41,7 +45,9 @@ export default {
           sessionStorage.setItem("view", "home");
           location.reload();
         } else {
-          // Handle login failure
+          if (response.status === 401) {
+            this.IDok = false;
+          }
           console.error("Login failed");
         }
       } catch (error) {
@@ -64,12 +70,12 @@ input:-webkit-autofill:active {
 .container {
   background-color: rgb(205, 205, 205);
   display: flex;
-  height: 100px;
+  height: auto;
   width: 15rem;
   justify-content: center;
   align-items: center;
   padding: 10px;
-  border-radius: 20px;
+  border-radius: 7px;
 }
 
 .input-container {
@@ -84,7 +90,8 @@ input:-webkit-autofill:active {
 .text-input {
   font-size: 17px;
   width: 10rem;
-  height: 50%;
+  min-height: 35px;
+  height: 100%;
   border-left: 5px solid rgb(0, 0, 0);
   border-right: 0px solid;
   border-top: 0px solid;
@@ -92,7 +99,12 @@ input:-webkit-autofill:active {
   background-color: transparent;
   margin-top: 10px;
   transition: all 0.3s ease-in-out;
+}
 
+.error-message {
+  color: red;
+  font-size: 0.8rem;
+  margin-bottom: 10px;
 }
 
 .button {
@@ -118,4 +130,6 @@ input:-webkit-autofill:active {
   border-color: #555 #555 transparent #555;
 
 }
+
+/* Add any custom styles for your login form here */
 </style>
