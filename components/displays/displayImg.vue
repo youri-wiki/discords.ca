@@ -6,29 +6,19 @@
     <h1>Images</h1>
     <div class="image-container">
       <div v-for="image in images" :key="image.id" class="image-wrapper">
-        <div
-          class="image-placeholder"
-          v-if="image.fileExtension === 'mp4' || image.error"
-          style="display: none"
-        ></div>
 
-        <img
-          :src="`data:image/${image.fileExtension};base64,${image.base64}`"
-          alt="image"
-          class="image"
-          @error="handleImageError"
-        />
+        <div class="image-placeholder" v-if="image.fileExtension === 'mp4' || image.error" style="display: none"></div>
+
+        <img :src="`data:image/${image.fileExtension};base64,${image.base64}`" alt="image" class="image" loading="lazy"
+          @error="handleImageError" />
+
         <div class="info">
-          <p
-            class="filename"
-            @click="
-              copyToClipboard(
-                `https://cdn.discords.ca/${image.Filename}.${image.fileExtension}`
-              )
-            "
-            style="cursor: pointer"
-          >
-            <i class="fas fa-search"></i> {{ truncateFilename(image.Filename) }}
+          <p class="filename" @click="
+            copyToClipboard(
+              `https://cdn.discords.ca/${image.fileName}.${image.fileExtension}`
+            )
+            " style="cursor: pointer">
+            <i class="fas fa-search"></i> {{ truncateFilename(image.fileName) }}
           </p>
           <p class="filename">
             <i class="fas fa-database"></i> {{ imageSize(image.base64) }} K
@@ -46,11 +36,18 @@ export default {
       password: "",
       noImage: true,
       images: [],
+      amount: 10, // Load 20 images at a time
+      offset: 0, // Start from the first image
+      isLoading: false, // To prevent multiple requests at the same time
     };
   },
   methods: {
     async getImages() {
       const runtimeConfig = useRuntimeConfig();
+
+      if (this.isLoading) return; // Prevent fetching if already loading
+
+      this.isLoading = true;
 
       try {
         const response = await fetch(
@@ -62,21 +59,43 @@ export default {
             },
             body: JSON.stringify({
               name: sessionStorage.getItem("username"),
+              amount: this.amount, // Send amount of images to load
+              offset: this.offset, // Send offset for pagination
             }),
           }
         );
         if (response.ok) {
-          const imageData = await response.json(); // Parse JSON data once
+          const imageData = await response.json();
           this.noImage = false;
-          console.log(imageData);
-          this.images = imageData; // Use the parsed JSON data
+
+          // Append new images to the existing array
+
+          console.log(imageData)
+          this.images = [...this.images, ...imageData];
+
+          // Increase offset for the next batch
+          this.offset += this.amount;
         } else {
           console.error("No images");
         }
       } catch (error) {
         console.error("Error during fetching:", error);
       }
+
+      this.isLoading = false; // Reset loading state
     },
+
+    // Check if the user has scrolled to the bottom
+    handleScroll() {
+      const scrollableElement = document.documentElement;
+      const atBottom =
+        scrollableElement.scrollHeight - scrollableElement.scrollTop <=
+        scrollableElement.clientHeight + 1000;
+      if (atBottom && !this.isLoading) {
+        this.getImages(); 
+      }
+    },
+
     imageSize(b64) {
       const char = atob(b64);
       var byteArray = new ArrayBuffer(char.length);
@@ -93,7 +112,7 @@ export default {
       var fileSize = blob.size;
 
       var size = fileSize / 1024;
-      //roudning off the size to 2 decimal places
+      // Rounding off the size to 2 decimal places
       size = Math.round(size * 100) / 100;
 
       return size;
@@ -104,6 +123,7 @@ export default {
     },
     truncateFilename(filename) {
       const maxLength = 15; // Adjust as needed
+      console.log(filename)
       return filename.length > maxLength
         ? filename.slice(0, maxLength) + "..."
         : filename;
@@ -113,9 +133,14 @@ export default {
     },
   },
   mounted() {
-    this.getImages();
+    this.getImages(); // Load the first batch of images
+    window.addEventListener("scroll", this.handleScroll); // Add scroll listener
+  },
+  beforeDestroy() {
+    window.removeEventListener("scroll", this.handleScroll); // Clean up listener
   },
 };
+
 </script>
 
 <style scoped>
@@ -126,6 +151,7 @@ h1 {
 p {
   font-family: "Quicksand", sans-serif;
 }
+
 .image-container {
   display: flex;
   flex-wrap: wrap;
@@ -133,6 +159,7 @@ p {
   margin-top: 20px;
   align-items: center;
 }
+
 .image-placeholder {
   width: 200px;
   height: 200px;
@@ -150,6 +177,7 @@ p {
   align-items: center;
   flex-direction: column;
 }
+
 .image {
   width: 150px;
   height: 150px;
