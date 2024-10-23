@@ -1,13 +1,11 @@
 <template>
   <div class="info">
     <div class="phone-number">
-      <p class="number" @click="HandleCopyPhone" :class="{ 'number--show': !showClipboardIcon, 'number': showClipboardIcon }">
+      <p class="number" @click="HandleCopyPhone"
+        :class="{ 'number--show': !showClipboardIcon, 'number': showClipboardIcon }">
         <i class="fas fa-phone"></i> {{ phone }}
       </p>
-      <div
-        class="clipboard-icon"
-        :class="{ 'clipboard-icon--show': showClipboardIcon }"
-      >
+      <div class="clipboard-icon" :class="{ 'clipboard-icon--show': showClipboardIcon }">
         <p>📋</p>
       </div>
     </div>
@@ -120,31 +118,38 @@ export default {
 </script>
 
 <style scoped lang="css">
+* {}
+
 .info {
   display: flex;
+  align-items: start;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  margin-top: 10px;
-  width: 17rem;
- 
 }
 
 .reseau-social {
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
   align-items: center;
-  text-align: center;
-  margin-bottom: 10px;
+  text-align: start;
   width: 90%;
+  margin-left: 20px;
 }
 
 .reseau-social p {
   font-size: 50px;
   text-align: center;
-  margin: 10px;
 }
+
+.google-map,
+.phone-number {
+  max-height: 150px;
+  align-content: center;
+  justify-content: center;
+  text-align: start;
+  padding: 10px;
+  margin-left: 20px;
+}
+
 
 .instagram,
 .facebook,
@@ -166,15 +171,13 @@ export default {
 }
 
 .instagram:hover {
-  background: linear-gradient(
-    45deg,
-    #833ab4,
-    #fd1d1d,
-    #fcb045,
-    #e1306c,
-    #c13584,
-    #833ab4
-  );
+  background: linear-gradient(45deg,
+      #833ab4,
+      #fd1d1d,
+      #fcb045,
+      #e1306c,
+      #c13584,
+      #833ab4);
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -183,14 +186,6 @@ export default {
   background: linear-gradient(45deg, #4285f4, #34a853, #fbbc05, #ea4335);
   background-clip: text;
   -webkit-text-fill-color: transparent;
-}
-
-.phone-number {
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
 }
 
 
@@ -220,7 +215,7 @@ export default {
   position: absolute;
   transition: all 0.3s ease-in-out;
   align-items: center;
-  justify-content: center;  
+  justify-content: center;
   right: -50%;
   top: 50%;
   transform: translate(-50%, -100%);
@@ -231,8 +226,8 @@ export default {
   font-size: 60px;
   position: absolute;
   align-items: center;
-  justify-content: center; 
-  right: 50%; 
+  justify-content: center;
+  right: 50%;
   top: 50%;
   transform: translate(50%, -100%);
 }
@@ -261,15 +256,13 @@ export default {
   }
 
   .instagram {
-    background: linear-gradient(
-      45deg,
-      #833ab4,
-      #fd1d1d,
-      #fcb045,
-      #e1306c,
-      #c13584,
-      #833ab4
-    );
+    background: linear-gradient(45deg,
+        #833ab4,
+        #fd1d1d,
+        #fcb045,
+        #e1306c,
+        #c13584,
+        #833ab4);
     background-clip: text;
     -webkit-text-fill-color: transparent;
   }

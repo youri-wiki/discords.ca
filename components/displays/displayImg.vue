@@ -134,7 +134,8 @@ export default {
   },
   mounted() {
     this.getImages(); // Load the first batch of images
-    window.addEventListener("scroll", this.handleScroll); // Add scroll listener
+    window.addEventListener("scroll", this.handleScroll);
+    // Add scroll listener
   },
   beforeDestroy() {
     window.removeEventListener("scroll", this.handleScroll); // Clean up listener

@@ -1,4 +1,5 @@
 <!-- eslint-disable vue/multi-word-component-names -->
+<!-- Horraire responsive cassé ; Revoire les espaces entres les elements.-->
 <template>
   <div class="upperthing">
     <p @click="toggleMenu">
@@ -47,7 +48,7 @@
         </div>
       </div>
     </div>
-    <footer>
+    <footer style="margin-top: 2rem;">
       <Footer></Footer>
     </footer>
   </div>
@@ -337,20 +338,15 @@ body {
   align-items: center;
   text-align: center;
   max-width: 100%;
+
 }
 
-.horraire,
-.adresse-container {
-  margin-right: 30px;
-}
 
 .container .horraire {
   position: relative;
-  top: 10px;
   width: 500px;
   height: 300px;
   border-radius: 10px;
-  overflow: hidden;
   font-family: "Nunito sans", sans-serif;
   max-width: 100%;
 }

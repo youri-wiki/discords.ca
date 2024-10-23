@@ -2,6 +2,12 @@
     <div class="bg">
         <div class="page">
             <Navbar />
+            <div class="content">
+                <h1>
+                    Displays ( agdasima )
+                </h1>
+                
+            </div>
         </div>
     </div>
 </template>
@@ -55,11 +61,20 @@ export default {
 <style scoped>
 .page {
     display: flex;
+    flex-direction: column;
     justify-self: center;
     align-self: center;
     min-height: 100vh;
     width: 100%;
     max-width: 1340px;
+
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .bg {
