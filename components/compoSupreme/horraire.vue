@@ -45,12 +45,17 @@ export default {
 </script>
 
 <style scoped>
+* {
+}
+
+
 .container {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   height: auto;
+
 }
 h3.title {
   font-size: 30px;
@@ -60,13 +65,11 @@ h3.title {
 .schedule-columns {
   position: relative;
   font-weight: bold;
-  margin-top: 5rem;
-  left: 50%;
-  transform: translate(-50%, -50%);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   box-sizing: border-box;
+
 }
 
 .schedule-item {
