@@ -1,0 +1,139 @@
+html,
+body {
+  background-color: #2b2d31;
+  margin: 0;
+}
+
+.tech-page {
+  color: #ffffff;
+  font-family: "Segoe UI", sans-serif;
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 20px;
+  line-height: 1.6;
+  box-sizing: border-box;
+}
+
+.tech-page h1,
+.tech-page h2,
+.tech-page h3 {
+  color: #ffffff;
+  margin-top: 2em;
+}
+
+.tech-page h1 {
+  font-size: 1.8em;
+  font-weight: bold;
+  border-bottom: 1px solid #4f545c;
+  padding-bottom: 0.3em;
+}
+
+.tech-page h2 {
+  font-size: 1.4em;
+}
+
+.tech-page h3 {
+  font-size: 1.2em;
+  color: #b9bbbe;
+}
+
+.tech-page p {
+  margin: 1em 0;
+}
+
+.tech-page a {
+  color: #00aff4;
+  text-decoration: none;
+}
+
+.tech-page a:hover {
+  text-decoration: underline;
+}
+
+.tech-page ul {
+  list-style-type: disc;
+  margin-left: 1.5em;
+}
+
+.tech-page hr {
+  border: none;
+  border-top: 1px solid #4f545c;
+  margin: 2em 0;
+}
+
+.tech-page .footer {
+  margin-top: 2em;
+  font-weight: bold;
+}
+
+.tech-page .references {
+  margin-top: 3em;
+}
+
+.tech-page .credits {
+  margin-top: 3em;
+}
+
+.tech-page .credits ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.tech-page .credits li {
+  margin-bottom: 0.5em;
+}
+
+.tech-page .credit-box {
+  background-color: #232428;
+  padding: 1em;
+  border-radius: 8px;
+  border: 1px solid #4f545c;
+}
+
+.tech-page .produced {
+  margin-top: 3em;
+  font-style: italic;
+  color: #b9bbbe;
+  text-align: center;
+}
+
+.tech-page .disclaimer {
+  margin-top: 2em;
+  font-size: 0.9em;
+  color: #888a8e;
+  text-align: center;
+  font-style: italic;
+}
+
+.tech-page .team-tag {
+  font-size: 0.8em;
+  color: #b9bbbe;
+  font-weight: normal;
+  margin-left: 5px;
+}
+
+.tech-page .page-switch {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 0.95em;
+  background-color: #232428;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #4f545c;
+}
+
+.tech-page .nav-link {
+  color: #ffffff;
+  text-decoration: none;
+  margin: 0 5px;
+}
+
+.tech-page .nav-link:hover {
+  text-decoration: underline;
+}
+
+.tech-page .nav-link.active {
+  color: #ffffff;
+  font-weight: bold;
+  text-decoration: underline;
+}
