@@ -69,7 +69,7 @@
         window.location.href = 'https://discord.gg/nbFMXcC3tf'
       },
       HandleRedirectkofi() {
-        window.location.href = 'https://ko-fi.com/masterdpro'
+        window.location.href = ''
       },
       updateDimensions() {
         this.width = window.innerWidth
