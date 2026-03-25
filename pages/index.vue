@@ -9,7 +9,7 @@
   <sidebar ref="sideMenu" />
 
   <div class="Top">
-    <h1>{{ pName }}</h1>
+    <h1>{{ pName }} !!</h1>
     <p><i>youri's messing up space</i></p>
   </div>
   <div v-if="module == 'home'">
@@ -105,7 +105,6 @@ import what from "../components/youri.wiki/what.vue";
 import snake from "../components/youri.wiki/snake.vue";
 import wtf from "../components/youri.wiki/wtf.vue";
 import login from "../components/youri.wiki/login.vue";
-
 
 export default {
   components: {
@@ -354,7 +353,7 @@ template {
   transition: all 0.3s ease-in-out;
 }
 
-.sidebar{
+.sidebar {
   display: flex;
   position: relative;
   margin-left: 30px;
