@@ -9,7 +9,7 @@
   <sidebar ref="sideMenu" />
 
   <div class="Top">
-    <h1>{{ pName }} !!</h1>
+    <h1>{{ pName }} !</h1>
     <p><i>youri's messing up space</i></p>
   </div>
   <div v-if="module == 'home'">
