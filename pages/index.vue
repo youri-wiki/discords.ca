@@ -1,8 +1,4 @@
 <template>
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, maximum-scale=1"
-  />
   <p @click="toggleMenu" class="sidebar">
     <i class="fas fa-bars"></i>
   </p>
@@ -65,7 +61,14 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from "vue";
 import { useHead } from "@unhead/vue";
+import sidebar from "../components/youri.wiki/sidebar.vue";
+import who from "../components/youri.wiki/who.vue";
+import what from "../components/youri.wiki/what.vue";
+import snake from "../components/youri.wiki/snake.vue";
+import wtf from "../components/youri.wiki/wtf.vue";
+import login from "../components/youri.wiki/login.vue";
 
 useHead({
   title: "🥥 discords.ca",
@@ -90,99 +93,77 @@ useHead({
       content: "This website ain't useful at all",
     },
     {
-      //change the color
       name: "theme-color",
       content: "#6b6a8f",
     },
   ],
 });
-</script>
 
-<script>
-import sidebar from "../components/youri.wiki/sidebar.vue";
-import who from "../components/youri.wiki/who.vue";
-import what from "../components/youri.wiki/what.vue";
-import snake from "../components/youri.wiki/snake.vue";
-import wtf from "../components/youri.wiki/wtf.vue";
-import login from "../components/youri.wiki/login.vue";
+const projects = ref([
+  {
+    name: "Displays 🖼️",
+    description:
+      "Displays is a website that allows you to host images and share them with an easy to use API!",
+    color: "rgb(119, 126, 218)",
+    logo: "https://discords.ca/api/image/displays",
+    link: "/displays",
+  },
+  {
+    name: "Counto 🧮",
+    description:
+      "Counto, a Discord bot that is going to make your server count to infinity!",
+    color: "#188b76",
+    logo: "https://discords.ca/api/image/counto",
+    link: "/counto",
+  },
+  {
+    name: "Pro's & co 🎭",
+    description:
+      "My own community Discord server! Mostly French, but everyone is welcome!",
+    color: "#7468af",
+    logo: "https://cdn.discordapp.com/icons/807434421279916034/dcc8c9be68ab7b23267b3de83291f612.webp",
+    link: "https://discord.gg/rJN5cwR3pf",
+  },
+]);
 
-export default {
-  components: {
-    sidebar,
-    who,
-    what,
-    snake,
-    wtf,
-    login,
-  },
-  data() {
-    return {
-      projects: [
-        {
-          name: "Displays 🖼️",
-          description:
-            "Displays is a website that allows you to host images and share them with an esay to use API !",
-          color: "rgb(119, 126, 218)",
-          logo: "https://discords.ca/api/image/displays",
-          link: "/displays",
-        },
-        {
-          name: "Counto 🧮",
-          description:
-            "Counto, a discord that going to make your server counting to the infinite!",
-          color: "#188b76",
-          logo: "https://discords.ca/api/image/counto",
-          link: "/counto",
-        },
-        {
-          name: "Pro's & co 🎭",
-          description:
-            "My own community discord server ! Mostly french, but everyone is welcome !",
-          color: "#7468af",
-          logo: "https://cdn.discordapp.com/icons/807434421279916034/dcc8c9be68ab7b23267b3de83291f612.webp",
-          link: "https://discord.gg/rJN5cwR3pf",
-        },
-      ],
-      module: "",
-      pName: "Discords.ca",
-    };
-  },
-  methods: {
-    redirect(link) {
-      window.location.href = link;
-    },
-    toggleMenu() {
-      this.$refs.sideMenu.toggleMenu();
-    },
-    getModule() {
-      const modules = ref([]);
+const module = ref("");
+const pName = ref("Discords.ca");
+const sideMenu = ref(null);
 
-      let module = window.location.search.split("?")[1];
-      if (!module) {
-        module = "home";
-      }
-      //get all the module in components/youri.wiki/
-      const files = import.meta.glob("../components/youri.wiki/*.vue");
-      modules.value = Object.keys(files).map((key) =>
-        key.replace(/.*\/(.+)\.vue$/, "$1")
-      );
-
-      if (modules.value.includes(module)) {
-        return module;
-      } else {
-        return "home";
-      }
-    },
-  },
-  mounted() {
-    this.module = this.getModule();
-    if (this.module == "home") {
-      this.pName = "Discords.ca";
-    } else {
-      this.pName = this.module;
-    }
-  },
+const redirect = (link) => {
+  window.location.href = link;
 };
+
+const toggleMenu = () => {
+  sideMenu.value.toggleMenu();
+};
+
+const getModule = () => {
+  let moduleParam = window.location.search.split("?")[1];
+  if (!moduleParam) {
+    moduleParam = "home";
+  }
+  // Get all modules in components/youri.wiki/
+  const files = import.meta.glob("../components/youri.wiki/*.vue");
+  const modules = Object.keys(files).map((key) =>
+    key.replace(/.*\/(.+)\.vue$/, "$1")
+  );
+
+  if (modules.includes(moduleParam)) {
+    return moduleParam;
+  } else {
+    return "home";
+  }
+};
+
+onMounted(() => {
+  module.value = getModule();
+  if (module.value === "home") {
+    pName.value = "Discords.ca";
+  } else {
+    pName.value = module.value;
+  }
+});
 </script>
 
 <style scoped>
