@@ -2,7 +2,7 @@ name: Build Nuxt App (Self-hosted)
 
 on:
   push:
-    branches: [ master ]
+    branches: [main]
 
 jobs:
   build:
