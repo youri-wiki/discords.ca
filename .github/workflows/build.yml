@@ -17,18 +17,25 @@ jobs:
         with:
           node-version: 20
 
+      - name: Install PM2 (if not installed)
+        run: npm install -g pm2
 
-      - name: Deploy files
+      - name: Deploy and reload app
         run: |
           APP_DIR=/home/youri/apps/discords.ca
+          APP_NAME=discords-app
 
           mkdir -p "$APP_DIR"
 
           rsync -av "$GITHUB_WORKSPACE/" "$APP_DIR/"
 
           cd "$APP_DIR"
+
           npm ci
           npm run build
 
-          # run in background
-          nohup node .output/server/index.mjs > app.log 2>&1 &
+          # Start or reload with zero downtime
+          pm2 reload "$APP_NAME" || pm2 start .output/server/index.mjs --name "$APP_NAME"
+
+          # Save process list
+          pm2 save
