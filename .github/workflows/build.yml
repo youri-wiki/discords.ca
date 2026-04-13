@@ -24,11 +24,11 @@ jobs:
 
           mkdir -p "$APP_DIR"
 
-          rsync -av --delete \
-            "GITHUB_WORKSPACE/" \
-            "$APP_DIR/"
-            
+          rsync -av "$GITHUB_WORKSPACE/" "$APP_DIR/"
+
           cd "$APP_DIR"
-          npm install --production
+          npm ci
           npm run build
-          node  .output/server/index.mjs
+
+          # run in background
+          nohup node .output/server/index.mjs > app.log 2>&1 &
