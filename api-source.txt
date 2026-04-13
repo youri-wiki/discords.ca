@@ -1,0 +1,144 @@
+main.py ----
+
+from db import collection
+from fastapi import FastAPI
+from models import KnowledgeCreate, Question
+from rag import add_knowledge, generate_answer
+
+app = FastAPI(title="Homelab AI API")
+
+
+# 🔹 HEALTH CHECK
+@app.get("/")
+def root():
+    return {"status": "running"}
+
+
+# 🔹 ADD KNOWLEDGE
+@app.post("/knowledge")
+def create_knowledge(item: KnowledgeCreate):
+    add_knowledge(item.text, item.metadata)
+    return {"status": "stored"}
+
+
+# 🔹 ASK QUESTION
+@app.post("/ask")
+def ask_question(q: Question):
+    return generate_answer(q.question)
+
+
+# 🔹 LIST KNOWLEDGE (basic)
+@app.get("/knowledge")
+def list_knowledge():
+    data = collection.get()
+    return {"count": len(data["documents"]), "data": data["documents"]}
+
+
+# 🔹 DELETE ALL KNOWLEDGE
+@app.delete("/knowledge")
+def delete_all():
+    collection.delete(where={})
+    return {"status": "all deleted"}
+
+
+# 🔹 DELETE ONE (by text match simple version)
+@app.delete("/knowledge/search")
+def delete_by_text(text: str):
+    results = collection.get()
+    ids_to_delete = []
+
+    for i, doc in enumerate(results["documents"]):
+        if text.lower() in doc.lower():
+            ids_to_delete.append(results["ids"][i])
+
+    if ids_to_delete:
+        collection.delete(ids=ids_to_delete)
+
+    return {"deleted_ids": ids_to_delete}
+
+
+
+
+------
+
+db.py ----
+
+import chromadb
+
+client = chromadb.Client(
+    settings=chromadb.config.Settings(persist_directory="./chroma_db")
+)
+
+collection = client.get_or_create_collection("homelab")
+
+-----
+
+models.py-----
+
+from typing import Optional
+
+from pydantic import BaseModel
+
+
+class KnowledgeCreate(BaseModel):
+    text: str
+    metadata: Optional[dict] = None
+
+
+class Question(BaseModel):
+    question: str
+
+
+------
+
+rag.py----
+
+import requests
+from db import collection
+
+OLLAMA_URL = "http://localhost:11434/api/generate"
+MODEL = "phi3"
+
+def add_knowledge(text, metadata=None):
+    import uuid
+    collection.add(
+        documents=[text],
+        metadatas=[metadata or {}],
+        ids=[str(uuid.uuid4())]
+    )
+
+def query_knowledge(query, n_results=5):
+    results = collection.query(
+        query_texts=[query],
+        n_results=n_results
+    )
+    return results.get("documents", [[]])[0]
+
+def generate_answer(question):
+    docs = query_knowledge(question)
+    context = "\n".join(docs)
+
+    prompt = f"""
+You are a homelab assistant.
+Answer clearly and concisely using the context.
+
+Context:
+{context}
+
+Question:
+{question}
+"""
+
+    response = requests.post(OLLAMA_URL, json={
+        "model": MODEL,
+        "prompt": prompt,
+        "stream": False
+    })
+
+    return {
+        "answer": response.json()["response"],
+        "context": docs
+    }
+    
+    
+    -----
