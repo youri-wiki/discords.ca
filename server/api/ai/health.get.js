@@ -1,5 +1,5 @@
 export default defineEventHandler(async () => {
-  const apiBase = "http://70.81.191.192:8000";
+  const apiBase = "http://70.81.191.192:8000"
 
   try {
     const response = await fetch(`${apiBase}/`, {
