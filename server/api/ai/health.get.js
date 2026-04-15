@@ -1,5 +1,5 @@
 export default defineEventHandler(async () => {
-  const apiBase = "http://10.0.0.213:8000";
+  const apiBase = "http://70.81.191.192:8000";
 
   try {
     const response = await fetch(`${apiBase}/`, {
@@ -24,7 +24,7 @@ export default defineEventHandler(async () => {
 
     return {
       status: data?.status ?? "unknown",
-      upstream: "10.0.0.213:8000",
+      upstream: "70.81.191.192:8000",
       reachable: true,
     };
   } catch (error) {
