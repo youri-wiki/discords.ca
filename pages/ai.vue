@@ -271,6 +271,8 @@ const awaitingKnowledgeConfirmation = ref(false);
 
 const healthStatus = ref("checking");
 const isCheckingHealth = ref(false);
+const ENABLE_KNOWLEDGE_CONFIRMATION = false;
+            
 
 const healthStatusClass = computed(() => {
   if (healthStatus.value === "online") return "online";
@@ -520,7 +522,7 @@ const askQuestion = async () => {
   question.value = "";
   await scrollMessagesToBottom();
 
-  if (awaitingKnowledgeConfirmation.value) {
+  if (ENABLE_KNOWLEDGE_CONFIRMATION && awaitingKnowledgeConfirmation.value) {
     if (isYes(userText)) {
       await confirmPendingKnowledge();
       return;
@@ -548,8 +550,11 @@ const askQuestion = async () => {
     return;
   }
 
-  const candidate = extractKnowledgeCandidate(userText);
-  if (candidate) {
+  const candidate = ENABLE_KNOWLEDGE_CONFIRMATION
+  ? extractKnowledgeCandidate(userText)
+  : null;
+
+if (candidate) {
     pendingKnowledgeCandidate.value = candidate;
     awaitingKnowledgeConfirmation.value = true;
     messages.value.push({
@@ -587,8 +592,11 @@ const askQuestion = async () => {
       context: Array.isArray(data?.context) ? data.context : [],
     });
 
-    const followupCandidate = extractKnowledgeCandidate(data?.answer ?? "");
-    if (followupCandidate && !awaitingKnowledgeConfirmation.value) {
+    const followupCandidate = ENABLE_KNOWLEDGE_CONFIRMATION
+  ? extractKnowledgeCandidate(data?.answer ?? "")
+  : null;
+
+if (followupCandidate && !awaitingKnowledgeConfirmation.value) {
       pendingKnowledgeCandidate.value = followupCandidate;
       awaitingKnowledgeConfirmation.value = true;
       messages.value.push({
