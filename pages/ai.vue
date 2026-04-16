@@ -30,10 +30,29 @@
           </button>
         </div>
       </div>
+
+      <nav class="tabs" aria-label="AI pages">
+        <button
+          class="tab"
+          :class="{ active: activeTab === 'chat' }"
+          @click="activeTab = 'chat'"
+          type="button"
+        >
+          Chat
+        </button>
+        <button
+          class="tab"
+          :class="{ active: activeTab === 'knowledge' }"
+          @click="activeTab = 'knowledge'"
+          type="button"
+        >
+          Model Knowledge
+        </button>
+      </nav>
     </section>
 
-    <div class="layout">
-      <section class="chat-card">
+    <div class="layout single-column">
+      <section v-if="activeTab === 'chat'" class="chat-card">
         <header class="chat-header">
           <h2>Chat</h2>
           <button class="secondary" @click="clearMessages" :disabled="isAsking">
@@ -52,7 +71,12 @@
             :class="['message', msg.role]"
           >
             <div class="bubble">
-              <p>{{ msg.content }}</p>
+              <p v-if="msg.role === 'user'">{{ msg.content }}</p>
+              <div
+                v-else
+                class="markdown-content"
+                v-html="renderAssistantMessage(msg.content)"
+              />
 
               <details
                 v-if="
@@ -97,9 +121,9 @@
         <p v-if="chatError" class="error">{{ chatError }}</p>
       </section>
 
-      <section class="knowledge-card">
+      <section v-else class="knowledge-card">
         <header class="knowledge-header">
-          <h2>Knowledge</h2>
+          <h2>Model Knowledge</h2>
           <button
             class="secondary"
             @click="fetchKnowledge"
@@ -200,6 +224,8 @@
 <script setup>
 import { computed, nextTick, onMounted, ref } from "vue";
 import { useHead } from "@unhead/vue";
+import { marked } from "marked";
+import DOMPurify from "dompurify";
 
 useHead({
   title: "AI Assistant - discords.ca",
@@ -213,6 +239,13 @@ useHead({
       content: "#6b6a8f",
     },
   ],
+});
+
+const activeTab = ref("chat");
+
+marked.setOptions({
+  gfm: true,
+  breaks: true,
 });
 
 const messages = ref([]);
@@ -232,6 +265,9 @@ const isKnowledgeLoading = ref(false);
 const isKnowledgeMutating = ref(false);
 const knowledgeError = ref("");
 const knowledgeSuccess = ref("");
+
+const pendingKnowledgeCandidate = ref(null);
+const awaitingKnowledgeConfirmation = ref(false);
 
 const healthStatus = ref("checking");
 const isCheckingHealth = ref(false);
@@ -306,6 +342,175 @@ const checkHealth = async () => {
   }
 };
 
+const extractKnowledgeCandidate = (text) => {
+  const raw = String(text || "").trim();
+  if (!raw) return null;
+
+  const hasSpecSignal =
+    /(cpu|cores?|threads?|ram|memory|gb|tb|nvme|ssd|hdd|gpu|nvidia|amd|intel|xeon|i[3579]-\d{3,5}|ryzen|pve\d+|proxmox|vm|lxc|zfs|raid)/i.test(
+      raw
+    );
+
+  if (!hasSpecSignal) return null;
+
+  const normalizeSpace = (s) => s.replace(/\s+/g, " ").trim();
+
+  // Host / node
+  const hostMatch =
+    raw.match(/\b(pve\d+)\b/i) ||
+    raw.match(/\b(main host|primary host|host|node)\b/i);
+
+  // CPU model: prioritize explicit "cpu: ..."
+  const cpuLabelMatch = raw.match(
+    /\bcpu\b\s*[:=-]?\s*([^\n,;|]+)/i
+  );
+  const cpuModelMatch =
+    (cpuLabelMatch && cpuLabelMatch[1]) ||
+    (raw.match(
+      /\b(?:intel|amd)\s+(?:core\s+)?(?:i[3579]-\d{3,5}[a-z]*|xeon\s+[a-z0-9\- ]+|ryzen\s+[a-z0-9\- ]+)\b/i
+    ) || [])[0] ||
+    (raw.match(/\bxeon\s+[a-z0-9\- ]+\b/i) || [])[0] ||
+    null;
+
+  // Cores / threads
+  const coresMatch =
+    raw.match(/\b(\d{1,2})\s*(?:cores?|c)\b/i) ||
+    raw.match(/\b(\d{1,2})c\/\d{1,2}t\b/i);
+
+  const threadsMatch =
+    raw.match(/\b(\d{1,2})\s*(?:threads?|t)\b/i) ||
+    raw.match(/\b\d{1,2}c\/(\d{1,2})t\b/i);
+
+  // RAM
+  const ramMatch =
+    raw.match(/\b(?:ram|memory)\b\s*[:=-]?\s*(\d+(?:\.\d+)?)\s*(gb|tb)\b/i) ||
+    raw.match(/\b(\d+(?:\.\d+)?)\s*(gb|tb)\s*(?:ram|memory)\b/i);
+
+  // Storage (first strong hit)
+  const storageMatch =
+    raw.match(
+      /\b(?:storage|disk)\b\s*[:=-]?\s*(\d+(?:\.\d+)?)\s*(gb|tb)\s*(nvme|ssd|hdd)?\b/i
+    ) ||
+    raw.match(/\b(\d+(?:\.\d+)?)\s*(gb|tb)\s*(nvme|ssd|hdd)\b/i) ||
+    raw.match(/\b(\d+(?:\.\d+)?)\s*(gb|tb)\b/i);
+
+  // GPU
+  const gpuLabelMatch = raw.match(/\bgpu\b\s*[:=-]?\s*([^\n,;|]+)/i);
+  const gpuModelMatch =
+    (gpuLabelMatch && gpuLabelMatch[1]) ||
+    (raw.match(
+      /\b(?:rtx|gtx|quadro|tesla|radeon|rx)\s*[a-z0-9\- ]+\b/i
+    ) || [])[0] ||
+    null;
+
+  const extracted = {
+    host: hostMatch ? normalizeSpace(hostMatch[1] || hostMatch[0]).toLowerCase() : null,
+    cpu_model: cpuModelMatch ? normalizeSpace(cpuModelMatch) : null,
+    cpu_cores: coresMatch ? Number(coresMatch[1]) : null,
+    cpu_threads: threadsMatch ? Number(threadsMatch[1]) : null,
+    ram_size: ramMatch ? Number(ramMatch[1]) : null,
+    ram_unit: ramMatch ? String(ramMatch[2]).toUpperCase() : null,
+    storage_size: storageMatch ? Number(storageMatch[1]) : null,
+    storage_unit: storageMatch ? String(storageMatch[2]).toUpperCase() : null,
+    storage_type:
+      storageMatch && storageMatch[3]
+        ? String(storageMatch[3]).toUpperCase()
+        : null,
+    gpu_model: gpuModelMatch ? normalizeSpace(gpuModelMatch) : null,
+  };
+
+  const meaningfulFields = Object.values(extracted).filter(
+    (v) => v !== null && v !== "" && !(typeof v === "number" && Number.isNaN(v))
+  );
+
+  if (meaningfulFields.length === 0) return null;
+
+  const summaryLines = [
+    "Chat-confirmed infrastructure specs:",
+    extracted.host ? `- Host: ${extracted.host}` : null,
+    extracted.cpu_model ? `- CPU: ${extracted.cpu_model}` : null,
+    extracted.cpu_cores ? `- Cores: ${extracted.cpu_cores}` : null,
+    extracted.cpu_threads ? `- Threads: ${extracted.cpu_threads}` : null,
+    extracted.ram_size && extracted.ram_unit
+      ? `- RAM: ${extracted.ram_size} ${extracted.ram_unit}`
+      : null,
+    extracted.storage_size && extracted.storage_unit
+      ? `- Storage: ${extracted.storage_size} ${extracted.storage_unit}${
+          extracted.storage_type ? ` ${extracted.storage_type}` : ""
+        }`
+      : null,
+    extracted.gpu_model ? `- GPU: ${extracted.gpu_model}` : null,
+    `- Raw input: ${raw}`,
+  ].filter(Boolean);
+
+  return {
+    text: summaryLines.join("\n"),
+    metadata: {
+      source: "chat-confirmed",
+      topic: "infrastructure",
+      kind: "host_specs",
+      created_at: new Date().toISOString(),
+      extracted,
+    },
+  };
+};
+
+const isYes = (value) =>
+  /^(y|yes|yeah|yep|sure|ok|okay|confirm)$/i.test(String(value || "").trim());
+const isNo = (value) =>
+  /^(n|no|nope|cancel|stop)$/i.test(String(value || "").trim());
+
+const confirmPendingKnowledge = async () => {
+  if (!pendingKnowledgeCandidate.value) return;
+
+  clearStatus();
+  isKnowledgeMutating.value = true;
+
+  try {
+    const candidate = pendingKnowledgeCandidate.value;
+    const res = await fetch("/api/ai/knowledge", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        text: candidate.text,
+        metadata: candidate.metadata,
+      }),
+    });
+
+    if (!res.ok) {
+      const msg = await readErrorMessage(
+        res,
+        `Failed to store confirmed knowledge (${res.status}).`
+      );
+      throw new Error(msg);
+    }
+
+    knowledgeSuccess.value = "Confirmed specs added to model knowledge.";
+    pendingKnowledgeCandidate.value = null;
+    awaitingKnowledgeConfirmation.value = false;
+    await fetchKnowledge();
+
+    messages.value.push({
+      role: "assistant",
+      content: "Great — I added that to my knowledge.",
+      context: [],
+    });
+  } catch (err) {
+    knowledgeError.value =
+      err?.message || "Failed to store confirmed knowledge.";
+    messages.value.push({
+      role: "assistant",
+      content: `I couldn't save that yet: ${knowledgeError.value}`,
+      context: [],
+    });
+  } finally {
+    isKnowledgeMutating.value = false;
+    await scrollMessagesToBottom();
+  }
+};
+
 const askQuestion = async () => {
   if (!question.value.trim() || isAsking.value) return;
 
@@ -314,6 +519,48 @@ const askQuestion = async () => {
   messages.value.push({ role: "user", content: userText });
   question.value = "";
   await scrollMessagesToBottom();
+
+  if (awaitingKnowledgeConfirmation.value) {
+    if (isYes(userText)) {
+      await confirmPendingKnowledge();
+      return;
+    }
+
+    if (isNo(userText)) {
+      pendingKnowledgeCandidate.value = null;
+      awaitingKnowledgeConfirmation.value = false;
+      messages.value.push({
+        role: "assistant",
+        content: "Understood — I will not add that to my knowledge.",
+        context: [],
+      });
+      await scrollMessagesToBottom();
+      return;
+    }
+
+    messages.value.push({
+      role: "assistant",
+      content:
+        "Please answer with **yes** or **no**. Do you want to add that to my knowledge?",
+      context: [],
+    });
+    await scrollMessagesToBottom();
+    return;
+  }
+
+  const candidate = extractKnowledgeCandidate(userText);
+  if (candidate) {
+    pendingKnowledgeCandidate.value = candidate;
+    awaitingKnowledgeConfirmation.value = true;
+    messages.value.push({
+      role: "assistant",
+      content:
+        "I extracted infrastructure specs from your message.\n\nDo you want to add this to my knowledge? (**yes/no**)",
+      context: [],
+    });
+    await scrollMessagesToBottom();
+    return;
+  }
 
   isAsking.value = true;
   try {
@@ -339,6 +586,18 @@ const askQuestion = async () => {
       content: data?.answer ?? "No answer returned.",
       context: Array.isArray(data?.context) ? data.context : [],
     });
+
+    const followupCandidate = extractKnowledgeCandidate(data?.answer ?? "");
+    if (followupCandidate && !awaitingKnowledgeConfirmation.value) {
+      pendingKnowledgeCandidate.value = followupCandidate;
+      awaitingKnowledgeConfirmation.value = true;
+      messages.value.push({
+        role: "assistant",
+        content:
+          "I can store the specs mentioned above as durable knowledge.\n\nDo you want to add this to my knowledge? (**yes/no**)",
+        context: [],
+      });
+    }
   } catch (err) {
     chatError.value = err?.message || "Failed to contact AI service.";
     messages.value.push({
@@ -491,9 +750,23 @@ const formatContext = (value) => {
   }
 };
 
+const renderAssistantMessage = (content) => {
+  try {
+    const raw = typeof content === "string" ? content : String(content ?? "");
+    const html = marked.parse(raw);
+    return DOMPurify.sanitize(html);
+  } catch {
+    const fallback =
+      typeof content === "string" ? content : String(content ?? "");
+    return DOMPurify.sanitize(`<p>${fallback}</p>`);
+  }
+};
+
 const clearMessages = () => {
   messages.value = [];
   chatError.value = "";
+  pendingKnowledgeCandidate.value = null;
+  awaitingKnowledgeConfirmation.value = false;
 };
 
 onMounted(async () => {
@@ -565,12 +838,44 @@ onMounted(async () => {
   font-size: 0.95rem;
 }
 
+.tabs {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tab {
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tab:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.tab.active {
+  background: #fff;
+  color: #374151;
+  border-color: #fff;
+}
+
 .layout {
   margin: 0 auto;
   max-width: 1200px;
   display: grid;
-  grid-template-columns: 1.5fr 1fr;
   gap: 20px;
+}
+
+.single-column {
+  grid-template-columns: 1fr;
 }
 
 .chat-card,
@@ -655,6 +960,77 @@ onMounted(async () => {
   background: #f3f4f6;
   border-radius: 8px;
   padding: 8px;
+}
+
+.markdown-content :deep(*) {
+  margin-top: 0;
+}
+
+.markdown-content :deep(p) {
+  margin: 0 0 10px;
+  line-height: 1.5;
+}
+
+.markdown-content :deep(h1),
+.markdown-content :deep(h2),
+.markdown-content :deep(h3),
+.markdown-content :deep(h4) {
+  margin: 0 0 10px;
+  line-height: 1.3;
+}
+
+.markdown-content :deep(ul),
+.markdown-content :deep(ol) {
+  margin: 0 0 10px 20px;
+  padding: 0;
+}
+
+.markdown-content :deep(li) {
+  margin: 4px 0;
+}
+
+.markdown-content :deep(blockquote) {
+  margin: 0 0 10px;
+  padding: 8px 12px;
+  border-left: 4px solid #c7d2fe;
+  background: #f8faff;
+  color: #374151;
+  border-radius: 6px;
+}
+
+.markdown-content :deep(code) {
+  background: #e5e7eb;
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  font-size: 0.9em;
+}
+
+.markdown-content :deep(pre) {
+  margin: 0 0 10px;
+  background: #111827;
+  color: #f9fafb;
+  border-radius: 8px;
+  padding: 10px;
+  overflow-x: auto;
+}
+
+.markdown-content :deep(pre code) {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}
+
+.markdown-content :deep(a) {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.markdown-content :deep(hr) {
+  border: none;
+  border-top: 1px solid #d1d5db;
+  margin: 12px 0;
 }
 
 .chat-form {
@@ -783,10 +1159,6 @@ button.danger-outline {
 }
 
 @media (max-width: 980px) {
-  .layout {
-    grid-template-columns: 1fr;
-  }
-
   .messages {
     max-height: 45vh;
   }
