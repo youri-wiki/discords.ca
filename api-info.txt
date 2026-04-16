@@ -1,7 +1,0 @@
-
-GET	/	Health check to verify API is running	None	None	{ "status": "running" }
-POST	/knowledge	Add new knowledge to the system (memory storage)	{ "text": "string", "metadata": { } }	None	{ "status": "stored" }
-GET	/knowledge	Retrieve all stored knowledge entries	None	None	{ "count": number, "data": [ ... ] }
-DELETE	/knowledge	Delete all stored knowledge	None	None	{ "status": "all deleted" }
-DELETE	/knowledge/search	Delete knowledge entries matching text	None	text=string	{ "deleted_ids": [ ... ] }
-POST	/ask	Ask a question using RAG (main AI endpoint)	{ "question": "string" }	None	{ "answer": "string", "context": [ ... ] }
