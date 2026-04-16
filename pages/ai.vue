@@ -526,7 +526,7 @@ const askQuestion = async () => {
       return;
     }
 
-    if (isNo(userText)) {
+    /*if (isNo(userText)) {
       pendingKnowledgeCandidate.value = null;
       awaitingKnowledgeConfirmation.value = false;
       messages.value.push({
@@ -543,7 +543,7 @@ const askQuestion = async () => {
       content:
         "Please answer with **yes** or **no**. Do you want to add that to my knowledge?",
       context: [],
-    });
+    });*/
     await scrollMessagesToBottom();
     return;
   }
