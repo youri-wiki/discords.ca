@@ -16,9 +16,19 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  const config = useRuntimeConfig(event);
+  const apiBase = String(config.aiApiBase || "").trim();
+
+  if (!apiBase) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: "Missing server runtime config: aiApiBase",
+    });
+  }
+
   try {
     const response = await fetch(
-      `http://10.0.0.213:8000/knowledge/search?text=${encodeURIComponent(text)}`,
+      `${apiBase}/knowledge/search?text=${encodeURIComponent(text)}`,
       {
         method: "DELETE",
       }

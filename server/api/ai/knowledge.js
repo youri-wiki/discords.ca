@@ -1,5 +1,9 @@
 export default defineEventHandler(async (event) => {
-  const apiBase = "http://10.0.0.213:8000";
+  const config = useRuntimeConfig();
+  const apiBase = (config.aiApiBase || "http://127.0.0.1:8000").replace(
+    /\/$/,
+    ""
+  );
   const method = event.node.req.method || "GET";
 
   if (method === "GET") {

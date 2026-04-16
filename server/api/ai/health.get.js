@@ -1,5 +1,15 @@
 export default defineEventHandler(async () => {
-  const apiBase = "http://70.81.191.192:8000"
+  const config = useRuntimeConfig();
+  const apiBase =
+    (typeof config?.aiApiBase === "string" && config.aiApiBase.trim()) ||
+    "http://127.0.0.1:8000";
+
+  let upstreamHost = "unknown";
+  try {
+    upstreamHost = new URL(apiBase).host;
+  } catch {
+    upstreamHost = String(apiBase).replace(/^https?:\/\//, "");
+  }
 
   try {
     const response = await fetch(`${apiBase}/`, {
@@ -24,7 +34,7 @@ export default defineEventHandler(async () => {
 
     return {
       status: data?.status ?? "unknown",
-      upstream: "70.81.191.192:8000",
+      upstream: upstreamHost,
       reachable: true,
     };
   } catch (error) {
@@ -34,7 +44,7 @@ export default defineEventHandler(async () => {
 
     throw createError({
       statusCode: 502,
-      statusMessage: "Unable to reach local AI API at 10.0.0.213:8000",
+      statusMessage: `Unable to reach local AI API at ${upstreamHost}`,
     });
   }
 });

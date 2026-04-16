@@ -6,8 +6,23 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  const config = useRuntimeConfig();
+  const apiBase = (
+    config.aiApiBaseUrl ||
+    process.env.AI_API_BASE_URL ||
+    ""
+  ).trim();
+
+  if (!apiBase) {
+    throw createError({
+      statusCode: 500,
+      statusMessage:
+        "Missing AI API base URL configuration (set AI_API_BASE_URL).",
+    });
+  }
+
   try {
-    const response = await fetch("http://10.0.0.213:8000/knowledge", {
+    const response = await fetch(`${apiBase}/knowledge`, {
       method: "DELETE",
     });
 

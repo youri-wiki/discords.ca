@@ -6,6 +6,13 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  const config = useRuntimeConfig(event);
+  const apiBase =
+    (typeof config?.aiApiBase === "string" && config.aiApiBase.trim()) ||
+    (typeof config?.public?.aiApiBase === "string" &&
+      config.public.aiApiBase.trim()) ||
+    "http://127.0.0.1:8000";
+
   const body = await readBody(event);
   const question = body?.question;
 
@@ -17,7 +24,7 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const response = await fetch("http://10.0.0.213:8000/ask", {
+    const response = await fetch(`${apiBase}/ask`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -48,7 +55,7 @@ export default defineEventHandler(async (event) => {
 
     throw createError({
       statusCode: 502,
-      statusMessage: "Unable to reach local AI API at 10.0.0.213:8000",
+      statusMessage: `Unable to reach local AI API at ${apiBase}`,
     });
   }
 });
