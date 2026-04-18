@@ -73,10 +73,27 @@
             <div class="bubble">
               <p v-if="msg.role === 'user'">{{ msg.content }}</p>
               <div
+                v-else-if="msg.isLoading"
+                class="assistant-loading"
+                aria-label="Assistant is typing"
+              >
+                <span class="loading-dot" />
+                <span class="loading-dot" />
+                <span class="loading-dot" />
+              </div>
+              <div
                 v-else
                 class="markdown-content"
                 v-html="renderAssistantMessage(msg.content)"
               />
+              <p
+                v-if="
+                  msg.role === 'assistant' && !msg.isLoading && msg.footerMeta
+                "
+                class="assistant-meta"
+              >
+                {{ msg.footerMeta }}
+              </p>
 
               <details
                 v-if="
@@ -243,6 +260,16 @@ useHead({
 
 const activeTab = ref("chat");
 
+const STREAM_DEBUG =
+  typeof window !== "undefined" &&
+  (window.location.search.includes("debugStream=1") ||
+    window.localStorage.getItem("debugStream") === "1");
+
+const debugStreamLog = (...args) => {
+  if (!STREAM_DEBUG) return;
+  console.debug("[ai-stream]", ...args);
+};
+
 marked.setOptions({
   gfm: true,
   breaks: true,
@@ -272,7 +299,6 @@ const awaitingKnowledgeConfirmation = ref(false);
 const healthStatus = ref("checking");
 const isCheckingHealth = ref(false);
 const ENABLE_KNOWLEDGE_CONFIRMATION = false;
-            
 
 const healthStatusClass = computed(() => {
   if (healthStatus.value === "online") return "online";
@@ -363,9 +389,7 @@ const extractKnowledgeCandidate = (text) => {
     raw.match(/\b(main host|primary host|host|node)\b/i);
 
   // CPU model: prioritize explicit "cpu: ..."
-  const cpuLabelMatch = raw.match(
-    /\bcpu\b\s*[:=-]?\s*([^\n,;|]+)/i
-  );
+  const cpuLabelMatch = raw.match(/\bcpu\b\s*[:=-]?\s*([^\n,;|]+)/i);
   const cpuModelMatch =
     (cpuLabelMatch && cpuLabelMatch[1]) ||
     (raw.match(
@@ -400,13 +424,14 @@ const extractKnowledgeCandidate = (text) => {
   const gpuLabelMatch = raw.match(/\bgpu\b\s*[:=-]?\s*([^\n,;|]+)/i);
   const gpuModelMatch =
     (gpuLabelMatch && gpuLabelMatch[1]) ||
-    (raw.match(
-      /\b(?:rtx|gtx|quadro|tesla|radeon|rx)\s*[a-z0-9\- ]+\b/i
-    ) || [])[0] ||
+    (raw.match(/\b(?:rtx|gtx|quadro|tesla|radeon|rx)\s*[a-z0-9\- ]+\b/i) ||
+      [])[0] ||
     null;
 
   const extracted = {
-    host: hostMatch ? normalizeSpace(hostMatch[1] || hostMatch[0]).toLowerCase() : null,
+    host: hostMatch
+      ? normalizeSpace(hostMatch[1] || hostMatch[0]).toLowerCase()
+      : null,
     cpu_model: cpuModelMatch ? normalizeSpace(cpuModelMatch) : null,
     cpu_cores: coresMatch ? Number(coresMatch[1]) : null,
     cpu_threads: threadsMatch ? Number(threadsMatch[1]) : null,
@@ -551,10 +576,10 @@ const askQuestion = async () => {
   }
 
   const candidate = ENABLE_KNOWLEDGE_CONFIRMATION
-  ? extractKnowledgeCandidate(userText)
-  : null;
+    ? extractKnowledgeCandidate(userText)
+    : null;
 
-if (candidate) {
+  if (candidate) {
     pendingKnowledgeCandidate.value = candidate;
     awaitingKnowledgeConfirmation.value = true;
     messages.value.push({
@@ -569,42 +594,237 @@ if (candidate) {
 
   isAsking.value = true;
   try {
-    const res = await fetch("/api/ai/ask", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ question: userText }),
-    });
+    const assistantMessage = {
+      role: "assistant",
+      content: "",
+      context: [],
+      isLoading: true,
+      footerMeta: "",
+    };
+    messages.value.push(assistantMessage);
+    let assistantIndex = messages.value.length - 1;
+    await scrollMessagesToBottom();
 
-    if (!res.ok) {
-      const msg = await readErrorMessage(
-        res,
-        `Failed to ask AI (${res.status}).`
+    let streamCompleted = false;
+    const streamStartedAt = Date.now();
+
+    try {
+      const streamRes = await fetch("/api/ai/ask/stream", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ question: userText }),
+      });
+
+      debugStreamLog("stream response", {
+        status: streamRes.status,
+        ok: streamRes.ok,
+        contentType: streamRes.headers.get("content-type"),
+      });
+
+      if (!streamRes.ok || !streamRes.body) {
+        const msg = await readErrorMessage(
+          streamRes,
+          `Failed to stream AI answer (${streamRes.status}).`
+        );
+        debugStreamLog("stream unavailable, fallback reason:", msg);
+        throw new Error(msg);
+      }
+
+      const reader = streamRes.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let eventType = "message";
+      let dataBuffer = "";
+
+      const processEvent = async () => {
+        const raw = dataBuffer.trim();
+        dataBuffer = "";
+        if (!raw) return;
+
+        let parsed = {};
+        try {
+          parsed = JSON.parse(raw);
+        } catch {
+          parsed = { text: raw };
+        }
+
+        debugStreamLog("event", eventType, parsed);
+
+        if (eventType === "chunk") {
+          const text = typeof parsed?.text === "string" ? parsed.text : "";
+          if (text) {
+            const nextContent = `${assistantMessage.content}${text}`;
+            const nextMessage = {
+              ...assistantMessage,
+              content: nextContent,
+              isLoading: false,
+            };
+            assistantMessage.content = nextContent;
+            messages.value = messages.value.map((msg, idx) =>
+              idx === assistantIndex ? nextMessage : msg
+            );
+            debugStreamLog("chunk appended", {
+              chunkLength: text.length,
+              totalLength: nextContent.length,
+            });
+            await scrollMessagesToBottom();
+          }
+        } else if (eventType === "done") {
+          assistantMessage.isLoading = false;
+
+          if (
+            Array.isArray(parsed?.context) &&
+            parsed.context.length &&
+            (!assistantMessage.context || assistantMessage.context.length === 0)
+          ) {
+            assistantMessage.context = parsed.context;
+          }
+
+          const elapsedMs = Math.max(0, Date.now() - streamStartedAt);
+          const elapsedSec = (elapsedMs / 1000).toFixed(2);
+          const modelName =
+            typeof parsed?.model === "string" && parsed.model.trim()
+              ? parsed.model.trim()
+              : "unknown model";
+          assistantMessage.footerMeta = `${modelName} • ${elapsedSec}s`;
+
+          messages.value = messages.value.map((msg, idx) =>
+            idx === assistantIndex ? { ...assistantMessage } : msg
+          );
+
+          streamCompleted = true;
+          debugStreamLog("done received", {
+            totalLength: assistantMessage.content.length,
+            contextCount: Array.isArray(assistantMessage.context)
+              ? assistantMessage.context.length
+              : 0,
+            footerMeta: assistantMessage.footerMeta,
+            isLoading: assistantMessage.isLoading,
+          });
+        } else if (eventType === "error") {
+          const message =
+            parsed?.message ||
+            parsed?.error ||
+            "Streaming failed while generating response.";
+          debugStreamLog("error event", message);
+          throw new Error(message);
+        }
+
+        eventType = "message";
+      };
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (!value) continue;
+
+        const decoded = decoder.decode(value, { stream: true });
+        if (!decoded) continue;
+
+        debugStreamLog("raw chunk", {
+          byteLength: value.byteLength,
+          preview: decoded.slice(0, 200),
+        });
+
+        buffer += decoded;
+
+        let frameEnd = buffer.search(/\r?\n\r?\n/);
+        while (frameEnd !== -1) {
+          const frame = buffer.slice(0, frameEnd);
+          const separatorMatch = buffer.slice(frameEnd).match(/^\r?\n\r?\n/);
+          const sepLen = separatorMatch ? separatorMatch[0].length : 2;
+          buffer = buffer.slice(frameEnd + sepLen);
+
+          const lines = frame.split(/\r?\n/);
+          for (const line of lines) {
+            if (!line) continue;
+            if (line.startsWith(":")) continue;
+            if (line.startsWith("event:")) {
+              eventType = line.slice(6).trim();
+            } else if (line.startsWith("data:")) {
+              const payload = line.slice(5).trimStart();
+              dataBuffer = dataBuffer ? `${dataBuffer}\n${payload}` : payload;
+            }
+          }
+
+          await processEvent();
+          frameEnd = buffer.search(/\r?\n\r?\n/);
+        }
+      }
+
+      const tail = decoder.decode();
+      if (tail) {
+        buffer += tail;
+      }
+
+      if (buffer.trim()) {
+        debugStreamLog("processing trailing buffer", buffer.slice(0, 200));
+        const trailingLines = buffer.split(/\r?\n/);
+        for (const line of trailingLines) {
+          if (!line) continue;
+          if (line.startsWith(":")) continue;
+          if (line.startsWith("event:")) {
+            eventType = line.slice(6).trim();
+          } else if (line.startsWith("data:")) {
+            const payload = line.slice(5).trimStart();
+            dataBuffer = dataBuffer ? `${dataBuffer}\n${payload}` : payload;
+          }
+        }
+      }
+
+      if (dataBuffer.trim()) {
+        await processEvent();
+      }
+
+      if (!assistantMessage.content.trim()) {
+        assistantMessage.content = "No answer returned.";
+        assistantMessage.isLoading = false;
+        messages.value = messages.value.map((msg, idx) =>
+          idx === assistantIndex ? { ...assistantMessage } : msg
+        );
+      }
+    } catch (streamErr) {
+      debugStreamLog("stream failed, using fallback /api/ai/ask", streamErr);
+      const res = await fetch("/api/ai/ask", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ question: userText }),
+      });
+
+      if (!res.ok) {
+        const msg = await readErrorMessage(
+          res,
+          `Failed to ask AI (${res.status}).`
+        );
+        throw new Error(msg);
+      }
+
+      const data = await res.json();
+      assistantMessage.content = data?.answer ?? "No answer returned.";
+      assistantMessage.content = data?.answer ?? "No answer returned.";
+      assistantMessage.context = Array.isArray(data?.context)
+        ? data.context
+        : [];
+      assistantMessage.isLoading = false;
+      const fallbackElapsedMs = Math.max(0, Date.now() - streamStartedAt);
+      const fallbackElapsedSec = (fallbackElapsedMs / 1000).toFixed(2);
+      const fallbackModel =
+        typeof data?.model === "string" && data.model.trim()
+          ? data.model.trim()
+          : "fallback";
+      assistantMessage.footerMeta = `${fallbackModel} • ${fallbackElapsedSec}s`;
+      messages.value = messages.value.map((msg, idx) =>
+        idx === assistantIndex ? { ...assistantMessage } : msg
       );
-      throw new Error(msg);
+      streamCompleted = true;
     }
 
-    const data = await res.json();
-    messages.value.push({
-      role: "assistant",
-      content: data?.answer ?? "No answer returned.",
-      context: Array.isArray(data?.context) ? data.context : [],
-    });
-
-    const followupCandidate = ENABLE_KNOWLEDGE_CONFIRMATION
-  ? extractKnowledgeCandidate(data?.answer ?? "")
-  : null;
-
-if (followupCandidate && !awaitingKnowledgeConfirmation.value) {
-      pendingKnowledgeCandidate.value = followupCandidate;
-      awaitingKnowledgeConfirmation.value = true;
-      messages.value.push({
-        role: "assistant",
-        content:
-          "I can store the specs mentioned above as durable knowledge.\n\nDo you want to add this to my knowledge? (**yes/no**)",
-        context: [],
-      });
+    if (!streamCompleted && !assistantMessage.content.trim()) {
+      assistantMessage.content = "No answer returned.";
     }
   } catch (err) {
     chatError.value = err?.message || "Failed to contact AI service.";
@@ -1039,6 +1259,49 @@ onMounted(async () => {
   border: none;
   border-top: 1px solid #d1d5db;
   margin: 12px 0;
+}
+
+.assistant-loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 18px;
+}
+
+.assistant-meta {
+  margin: 6px 0 0;
+  color: #6b7280;
+  font-size: 0.82rem;
+  font-style: italic;
+}
+
+.loading-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #9ca3af;
+  animation: ai-loading-bounce 1s infinite ease-in-out;
+}
+
+.loading-dot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.loading-dot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes ai-loading-bounce {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.35;
+  }
+  40% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
 }
 
 .chat-form {

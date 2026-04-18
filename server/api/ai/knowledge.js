@@ -1,6 +1,6 @@
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
-  const apiBase = (config.aiApiBase || "http://127.0.0.1:8000").replace(
+  const apiBase = (config.aiApiBase).replace(
     /\/$/,
     ""
   );
