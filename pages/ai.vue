@@ -4,7 +4,7 @@
       <div class="hero-row">
         <div>
           <h1>Local AI Assistant</h1>
-          <p>Chat with your assistant and manage its knowledge base.</p>
+          <p>Chat with your assistant and manage its knowledge base</p>
         </div>
 
         <div class="health" :class="healthStatusClass">
