@@ -1,0 +1,22 @@
+services:
+  app:
+    image: ghcr.io/youri-wiki/discords.ca:latest
+    container_name: discords-ca
+    restart: unless-stopped
+    pull_policy: always
+    ports:
+      - "3000:3000"
+    environment:
+      NITRO_HOST: "0.0.0.0"
+      NITRO_PORT: "3000"
+      AI_API_BASE_URL: "${AI_API_BASE_URL:-http://127.0.0.1:8000}"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/').then(r => { if (!r.ok) process.exit(1) }).catch(() => process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s

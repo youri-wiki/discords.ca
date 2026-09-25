@@ -1,41 +1,47 @@
-name: Build Nuxt App (Self-hosted)
+name: Build and publish Docker image
 
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
 
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v5
 
-      - name: Use Node.js 1
-        uses: actions/setup-node@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
-          node-version: 20
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install PM2 (if not installed.)
-        run: npm install -g pm2
+      - name: Generate image tags
+        id: metadata
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=raw,value=latest
+            type=sha
 
-      - name: Deploy and reload app
-        run: |
-          APP_DIR=/home/youri/apps/discords.ca
-          APP_NAME=discords-app
-
-          mkdir -p "$APP_DIR"
-
-          rsync -av "$GITHUB_WORKSPACE/" "$APP_DIR/"
-
-          cd "$APP_DIR"
-
-          npm ci
-          npm run build
-
-          # Start or reload with zero downtime
-          pm2 reload "$APP_NAME" || pm2 start .output/server/index.mjs --name "$APP_NAME"
-
-          # Save process list
-          pm2 save
+      - name: Build and publish image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.metadata.outputs.tags }}
+          labels: ${{ steps.metadata.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
