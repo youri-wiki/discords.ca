@@ -1,0 +1,11 @@
+[Unit]
+Description=Check for a new discords.ca image
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+RandomizedDelaySec=30s
+Persistent=true
+
+[Install]
+WantedBy=timers.target

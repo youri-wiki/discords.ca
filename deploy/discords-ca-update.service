@@ -1,0 +1,9 @@
+[Unit]
+Description=Update the discords.ca container
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/discords-ca-update
