@@ -56,12 +56,12 @@
     </div>
   </div>
   <div v-else>
-    <component :is="module" />
+    <component :is="activeComponent" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { computed, ref, onMounted } from "vue";
 import { useHead } from "@unhead/vue";
 import sidebar from "../components/youri.wiki/sidebar.vue";
 import who from "../components/youri.wiki/who.vue";
@@ -129,6 +129,8 @@ const projects = ref([
 const module = ref("");
 const pName = ref("Discords.ca");
 const sideMenu = ref(null);
+const pageComponents = { who, what, snake, wtf, login };
+const activeComponent = computed(() => pageComponents[module.value] ?? null);
 
 const redirect = (link) => {
   window.location.href = link;
@@ -143,11 +145,7 @@ const getModule = () => {
   if (!moduleParam) {
     moduleParam = "home";
   }
-  // Get all modules in components/youri.wiki/
-  const files = import.meta.glob("../components/youri.wiki/*.vue");
-  const modules = Object.keys(files).map((key) =>
-    key.replace(/.*\/(.+)\.vue$/, "$1")
-  );
+  const modules = ["home", ...Object.keys(pageComponents)];
 
   if (modules.includes(moduleParam)) {
     return moduleParam;
