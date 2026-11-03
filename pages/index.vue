@@ -101,6 +101,14 @@ useHead({
 
 const projects = ref([
   {
+    name: "Minecraft Search ⛏️",
+    description:
+      "Search blocks, mobs, recipes, enchantments and game mechanics using the Minecraft Wiki.",
+    color: "#83b54c",
+    logo: "https://minecraft.wiki/images/Diamond_JE3_BE3.png",
+    link: "/minecraft",
+  },
+  {
     name: "Displays 🖼️",
     description:
       "Displays is a website that allows you to host images and share them with an easy to use API!",
