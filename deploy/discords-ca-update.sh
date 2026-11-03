@@ -7,7 +7,7 @@ DEPLOYED_REVISION_FILE="$APP_DIR/.deployed-revision"
 
 cd "$SOURCE_DIR"
 git fetch origin main
-remote_revision=$(git rev-parse origin/main)
+remote_revision=$(git rev-parse FETCH_HEAD)
 deployed_revision=$(cat "$DEPLOYED_REVISION_FILE" 2>/dev/null || true)
 
 if [ "$remote_revision" = "$deployed_revision" ]; then
